@@ -146,32 +146,6 @@ public class BoostedNetsClassifier implements Classifier
         return (int) Math.round(threshold(x));
     }
 
-    public double predictTraining()
-    {
-        int numCorrect = 0;
-        for (int e = 0; e < N; e++)
-        {
-            // System.out.println("Example#: " + e);
-            int pred = predict(ds.trainEx[e]);
-
-            // System.out.println(ds.trainLabel[e] + " vs. " + pred);
-            if (pred == ds.trainLabel[e]) numCorrect++;
-        }
-        return (double)numCorrect / N;
-    }
-
-    public double predictTesting()
-    {
-        int numCorrect = 0;
-        int numTests = ds.numTrainExs - N;
-        for (int e = N; e < ds.numTrainExs; e++)
-        {
-            int pred = predict(ds.trainEx[e]);
-            if (pred == ds.trainLabel[e]) numCorrect++;
-        }
-        return (double)numCorrect / numTests;
-    }
-
 /******************************************
 / PUBLIC METHODS
 /******************************************/
@@ -193,7 +167,6 @@ public class BoostedNetsClassifier implements Classifier
     	{
     		ewts[i] = (double) 1 / N;
     	}
-        // System.out.println();
 
         /*generation of hypotheses by the Adaboost algorithm in Schapire 1.1*/
         for (int t = 0; t < T; t++)
@@ -219,23 +192,13 @@ public class BoostedNetsClassifier implements Classifier
                     correct[e] = false;
                     err += ewts[e];
                 }
-
-                // System.out.print(correct[e] + " ");
             }
-
-            // System.out.println();
-
-            // System.out.println("Accuracy: " + numRight/(double)N);
-            // System.out.printf("Weighted Error: %.3f", err);
-            // System.out.println();
 
             /*compute hypothesis weight*/
             if (err == 0.0)
                 hwts[t] = 0;
             else
                 hwts[t] = .5 * Math.log((1-err)/err);
-            // System.out.println("Alpha: " + hwts[t]);
-
 
             /*compute example weights for next round of boosting*/
             for (int e = 0; e < N; e++)
@@ -261,27 +224,8 @@ public class BoostedNetsClassifier implements Classifier
                     correct[e] = false;
                     err += ewts[e];
                 }
-
-                // System.out.print(correct[e] + " ");
             }
-            // System.out.println("Error with respect to new weights is: " + err);
-
-            // for (int e = 0; e < N; e++)
-            // {
-            //     System.out.printf("%.3f  ", ewts[e]);
-            // }
-            // System.out.println();
-            // System.out.println();
-
         }
-
-
-        // double acc1 = predictTraining();
-        // System.out.println("Accuracy on Training Data: " + acc1);
-        // double acc2 = predictTesting();
-        // System.out.println("Accuracy on Test Data: " + acc2);
-        // System.out.println();
-
     }
 
 
@@ -304,6 +248,29 @@ public class BoostedNetsClassifier implements Classifier
             return 0; //reassign value of 0 to negative prediction
         else
             return 1;
+    }
+
+    public double predictTraining()
+    {
+        int numCorrect = 0;
+        for (int e = 0; e < N; e++)
+        {
+            int pred = predict(ds.trainEx[e]);
+            if (pred == ds.trainLabel[e]) numCorrect++;
+        }
+        return (double)numCorrect / N;
+    }
+
+    public double predictTesting()
+    {
+        int numCorrect = 0;
+        int numTests = ds.numTrainExs - N;
+        for (int e = N; e < ds.numTrainExs; e++)
+        {
+            int pred = predict(ds.trainEx[e]);
+            if (pred == ds.trainLabel[e]) numCorrect++;
+        }
+        return (double)numCorrect / numTests;
     }
 
     public String algorithmDescription()

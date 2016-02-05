@@ -90,27 +90,6 @@ public class AdiClassifier2 implements Classifier
         return stump[bestAttribVal+1];
     }
 
-    public double predictTraining()
-    {
-        int numCorrect = 0;
-        for (int e = 0; e < N; e++)
-        {
-            int pred = predict(ds.trainEx[e]);
-            if (pred == ds.trainLabel[e]) numCorrect++;
-        }
-        return (double)numCorrect / N;
-    }
-
-    public double predictTesting()
-    {
-        int numCorrect = 0;
-        for (int e = N; e < ds.numTrainExs; e++)
-        {
-            int pred = predict(ds.trainEx[e]);
-            if (pred == ds.trainLabel[e]) numCorrect++;
-        }
-        return (double) numCorrect / (ds.numTrainExs - N);
-    }
 
 /******************************************
 / PUBLIC METHODS
@@ -137,11 +116,9 @@ public class AdiClassifier2 implements Classifier
         /*generation of hypotheses by the Adaboost algorithm in Schapire 1.1*/
         for (int t = 0; t < T; t++)
         {
-            // System.out.println("Boosting Round: " + t);
             /*generate decision stump hypothesis based on weights*/
             hyps[t] = stumpClassifier(ewts);
-            // System.out.println("Attribute tested: " + hyps[t][0]);
-            
+
             /*determine error of hypothesis on training data*/
             boolean [] correct = new boolean[N];
             int numRight = 0;
@@ -161,14 +138,8 @@ public class AdiClassifier2 implements Classifier
                 }
             }
 
-            // System.out.println("Accuracy: " + numRight/(double)N);
-            // System.out.printf("Weighted Error: %.3f", err);
-            // System.out.println();
-
             /*compute hypothesis weight*/
             hwts[t] = .5 * Math.log((1-err)/err);
-            // System.out.println("Alpha: " + hwts[t]);
-            // System.out.println();
 
 
             /*compute example weights for next round of boosting*/
@@ -182,12 +153,6 @@ public class AdiClassifier2 implements Classifier
 
             ewts = AdiClassifier2.normalize(ewts);
         }
-
-        // double acc = predictFullTraining();
-        // System.out.println("Accuracy on Training Data: " + acc);
-        // double acc2 = predictFullTesting();
-        // System.out.println("Accuracy on Testing Data: " + acc2);
-        // System.out.println();
     }
 
 
@@ -210,6 +175,28 @@ public class AdiClassifier2 implements Classifier
             return 0; //reassign value of 0 to negative prediction
         else
             return 1;
+    }
+
+    public double predictTraining()
+    {
+        int numCorrect = 0;
+        for (int e = 0; e < N; e++)
+        {
+            int pred = predict(ds.trainEx[e]);
+            if (pred == ds.trainLabel[e]) numCorrect++;
+        }
+        return (double)numCorrect / N;
+    }
+
+    public double predictTesting()
+    {
+        int numCorrect = 0;
+        for (int e = N; e < ds.numTrainExs; e++)
+        {
+            int pred = predict(ds.trainEx[e]);
+            if (pred == ds.trainLabel[e]) numCorrect++;
+        }
+        return (double) numCorrect / (ds.numTrainExs - N);
     }
 
     public String algorithmDescription()
